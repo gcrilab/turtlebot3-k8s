@@ -49,6 +49,26 @@ turtlebot3-k8s/
 
 ---
 
+## Before You Start: Customisation Checklist
+
+Every value below is hardcoded to the authors' lab cluster. Change them to match your own setup before deploying anything.
+
+| File | Field | Authors' value | What to set |
+|------|-------|----------------|-------------|
+| `k8s/cyclonedds-configmap.yaml` | `<Peer Address=.../>` (×2) | `192.168.1.100` / `192.168.1.101` | Host-network IPs of your desktop and RPi4 nodes |
+| `k8s/controller-deployment.yaml` | `nodeSelector: kubernetes.io/hostname` | `u1-desktop` | Hostname of the node where the controller runs (`kubectl get nodes`) |
+| `k8s/controller-deployment.yaml` | `hostPath.path` (logs volume) | `/home/u1/turtlebot3-logs` | Writable path on your controller node |
+| `k8s/bringup-deployment.yaml` | `nodeSelector: kubernetes.io/hostname` | `rpi4` | Hostname of the node physically connected to the robot |
+| `bringup/run.sh` | `IMAGE_NAME` | `gcrilab/turtlebot3-burger-bringup-3` | Your Docker Hub image name (if you rebuild and push under your own account) |
+| `controller/run.sh` | `IMAGE_NAME` | `gcrilab/turtlebot3-figure8:latest` | Your Docker Hub image name (if you rebuild and push under your own account) |
+
+To find your node hostnames:
+```bash
+kubectl get nodes -o wide
+```
+
+---
+
 ## Cluster Setup
 
 ### 1. RKE2
@@ -181,10 +201,11 @@ kubectl exec -it deployment/turtlebot3-controller -- \
 
 ## Analyzing Results
 
-After an experiment, copy the CSV log from the host-path volume and run the visualization script:
+After an experiment, copy the CSV log from the host-path volume on the **desktop node** (`u1-desktop`) and run the visualisation script. The controller pod runs on `u1-desktop` (not the RPi4), so logs are written to `/home/u1/turtlebot3-logs` on that machine:
 
 ```bash
-scp u1@<desktop-ip>:/home/u1/turtlebot3-logs/enhanced_log_figure8_1.csv .
+# u1 is the username on the desktop node (u1-desktop), not the RPi4
+scp u1@<u1-desktop-ip>:/home/u1/turtlebot3-logs/enhanced_log_figure8_1.csv .
 cd controller
 python3 plot_trajectory.py enhanced_log_figure8_1.csv
 ```
