@@ -179,9 +179,9 @@ kubectl exec -it deployment/turtlebot3-controller -- \
 
 ---
 
-## Analysing Results
+## Analyzing Results
 
-After an experiment, copy the CSV log from the host-path volume and run the visualisation script:
+After an experiment, copy the CSV log from the host-path volume and run the visualization script:
 
 ```bash
 scp u1@<desktop-ip>:/home/u1/turtlebot3-logs/enhanced_log_figure8_1.csv .
@@ -212,7 +212,7 @@ If you use this software in your research, please cite:
 @inproceedings{ajeigbe2026turtlebot3k8s,
   title     = {Orchestrating Mobile Robot Control with {Kubernetes}:
                A {ROS} 2 Integration on Bare-Metal Edge Clusters},
-  author    = {Ajeigbe, Oluwafemi and Roy, Sandip},
+  author    = {Ajeigbe, Oluwafemi, Grace Harris, and Roy, Sandip},
   booktitle = {Proc. IEEE International Conference on Collaboration
                and Internet Computing (CIC)},
   year      = {2026},
