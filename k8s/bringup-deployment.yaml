@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: turtlebot3-bringup
+  namespace: default
+  labels:
+    app: turtlebot3
+    component: bringup
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: turtlebot3
+      component: bringup
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: turtlebot3
+        component: bringup
+    spec:
+      hostNetwork: true               # Required for DDS discovery across Flannel overlay
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        # Pin to the node where the TurtleBot3 is physically connected via USB
+        kubernetes.io/hostname: rpi4  # Adjust to your RPi4 node name
+      containers:
+        - name: turtlebot3-bringup
+          image: gcrilab/turtlebot3-burger-bringup-3:latest
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true          # Required for device access (OpenCR, LiDAR)
+          env:
+            - name: TURTLEBOT3_MODEL
+              value: "burger"
+            - name: LDS_MODEL
+              value: "LDS-02"
+            - name: ROS_DOMAIN_ID
+              value: "0"
+            - name: RMW_IMPLEMENTATION
+              value: "rmw_cyclonedds_cpp"
+            - name: CYCLONEDDS_URI
+              value: "file:///cyclonedds/cyclonedds.xml"
+          volumeMounts:
+            - name: dev-ttyacm0
+              mountPath: /dev/ttyACM0
+            - name: dev-ttyusb0
+              mountPath: /dev/ttyUSB0
+            - name: dev-video0
+              mountPath: /dev/video0
+            - name: cyclonedds-config
+              mountPath: /cyclonedds
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"
+      volumes:
+        - name: dev-ttyacm0
+          hostPath:
+            path: /dev/ttyACM0
+            type: CharDevice
+        - name: dev-ttyusb0
+          hostPath:
+            path: /dev/ttyUSB0
+            type: CharDevice
+        - name: dev-video0
+          hostPath:
+            path: /dev/video0
+            type: CharDevice
+        - name: cyclonedds-config
+          configMap:
+            name: cyclonedds-config
+      restartPolicy: Always

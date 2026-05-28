@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: turtlebot3-controller
+  namespace: default
+  labels:
+    app: turtlebot3
+    component: controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: turtlebot3
+      component: controller
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: turtlebot3
+        component: controller
+    spec:
+      hostNetwork: true               # Must match bringup — required for DDS discovery
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        kubernetes.io/hostname: u1-desktop   # Same node as bringup
+      containers:
+        - name: turtlebot3-controller
+          image: gcrilab/turtlebot3-figure8:latest
+          imagePullPolicy: Always
+          env:
+            - name: TURTLEBOT3_MODEL
+              value: "burger"
+            - name: ROS_DOMAIN_ID
+              value: "0"
+            - name: RMW_IMPLEMENTATION
+              value: "rmw_cyclonedds_cpp"
+            - name: CYCLONEDDS_URI
+              value: "file:///cyclonedds/cyclonedds.xml"
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+            - name: cyclonedds-config
+              mountPath: /cyclonedds
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "128Mi"
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"
+      volumes:
+        - name: logs
+          hostPath:
+            path: /home/u1/turtlebot3-logs    # Adjust to your preferred log path
+            type: DirectoryOrCreate
+        - name: cyclonedds-config
+          configMap:
+            name: cyclonedds-config
+      restartPolicy: Always

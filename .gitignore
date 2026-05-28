@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+env/
+
+# Experiment logs (often large — commit only processed figures)
+*.csv
+logs/
+
+# Generated figures (re-generate from CSV)
+*.png
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# Secrets — never commit these
+*.env
+.env*
+kubeconfig
+*.pem
+*.key

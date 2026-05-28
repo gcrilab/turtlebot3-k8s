@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cyclonedds-config
+  namespace: default
+  labels:
+    app: turtlebot3
+data:
+  cyclonedds.xml: |
+    <?xml version="1.0" encoding="UTF-8" ?>
+    <CycloneDDS xmlns="https://cdds.io/config"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="https://cdds.io/config
+                https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/master/etc/cyclonedds.xsd">
+      <Domain Id="any">
+        <General>
+          <!-- Disable multicast; use explicit unicast peers to work across the
+               Flannel overlay network where multicast is not forwarded. -->
+          <AllowMulticast>false</AllowMulticast>
+          <MaxMessageSize>65500B</MaxMessageSize>
+        </General>
+        <Discovery>
+          <Peers>
+            <!-- Add the IP address of each cluster node that runs ROS 2 pods.
+                 Use the host network IP (not the pod/overlay IP). -->
+            <Peer Address="192.168.1.100"/>  <!-- u1-desktop (controller node) -->
+            <Peer Address="192.168.1.101"/>  <!-- rpi4 (bringup node)          -->
+          </Peers>
+          <ParticipantIndex>auto</ParticipantIndex>
+        </Discovery>
+        <Internal>
+          <Watermarks>
+            <WhcHigh>500kB</WhcHigh>
+          </Watermarks>
+        </Internal>
+      </Domain>
+    </CycloneDDS>
